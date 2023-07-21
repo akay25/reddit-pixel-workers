@@ -7,7 +7,7 @@ class FakeMailBox:
     def __init__(self, person: FakePerson):
         super().__init__()
         self.person = person
-        self.generate_email_address("satomi52@1secmail.com")
+        self.generate_email_address()
 
     @property
     def available_domains(self):
