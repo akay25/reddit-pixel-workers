@@ -176,7 +176,7 @@ def create_account(person: FakePerson, headless=True) -> bool:
             logger.info("Sleeping for 10 mins")
             sleep_randomly(600, 1000)
             # It expires session so need to do the whole thing again
-            return
+            return False
 
         # Wait for page redirection and pop-up for gender selection
         sleep_randomly(10, 20)
@@ -197,10 +197,10 @@ def create_account(person: FakePerson, headless=True) -> bool:
         sleep_randomly()
         logger.info("Successfully created account!")
         driver.close()
-        return
+        return True
     except Exception as e:
         logger.error(f"Error. Trying again...{e}")
         driver.close()
         time.sleep(120)
         create_account(person)
-        return
+        return False
