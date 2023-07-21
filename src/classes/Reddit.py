@@ -16,9 +16,9 @@ BROWSER_WINDOW_HEIGHT = 768
 class Reddit:
     REGISTER_URL = "https://www.reddit.com/register/"
 
-    def __init__(self, person: Person, headless=True, logger=None):
+    def __init__(self, person: FakePerson, headless=True, logger=None):
         self.person = person
-        self.logger = logger or get_logger()
+        self.logger = logger or get_logger(__name__)
 
         # Init selenium driver
         self.driver = uc.Chrome(headless=headless, use_subprocess=False)
@@ -144,14 +144,14 @@ class Reddit:
                                 return anchor.attrs["href"]
         return None
 
-    def create_account() -> bool:
+    def create_account(self) -> bool:
         self.logger.info(f"Creating account with username: {self.person.username}")
         self.logger.debug("Going to reddit homepage")
         self.driver.get(self.REGISTER_URL)
         self.sleep_randomly()
 
         self.logger.debug("Entering email details")
-        self.driver.find_element(By.ID, "regEmail").send_keys(person.email)
+        self.driver.find_element(By.ID, "regEmail").send_keys(self.person.email)
         self.sleep_randomly()
 
         self.logger.debug("Submitting email step")
@@ -166,10 +166,12 @@ class Reddit:
             self.logger.debug("Entering in username...")
             self.driver.find_element(By.ID, "regUsername").click()
             self.driver.find_element(By.ID, "regUsername").clear()
-            self.driver.find_element(By.ID, "regUsername").send_keys(person.username)
+            self.driver.find_element(By.ID, "regUsername").send_keys(
+                self.person.username
+            )
             self.sleep_randomly()
 
-            if not is_duplicate_username(driver):
+            if not self.is_duplicate_username():
                 break
             self.person.username = self.person.username + str(randint(0, 9))
             self.logger.debug(
@@ -177,7 +179,7 @@ class Reddit:
             )
 
         self.logger.debug("Entering in password...")
-        self.driver.find_element(By.ID, "regPassword").send_keys(person.password)
+        self.driver.find_element(By.ID, "regPassword").send_keys(self.person.password)
         self.sleep_randomly()
 
         # TODO: Solve captcha
@@ -189,7 +191,7 @@ class Reddit:
         ).click()
         self.sleep_randomly(1, 5)
 
-        if check_for_submit_rate_limit(driver):
+        if self.check_for_submit_rate_limit():
             self.logger.critical("Rate limit reached for the current IP")
             # It expires session so need to do the whole thing again
             return False
