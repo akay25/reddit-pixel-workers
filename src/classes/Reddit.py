@@ -106,7 +106,7 @@ class Reddit:
             interest_button_element.click()
             self.sleep_randomly(1, 2)
 
-        find_and_click_continue_button(driver)
+        self.find_and_click_continue_button()
 
         self.person.interests = selected_interests
 
@@ -131,7 +131,7 @@ class Reddit:
         try_count = 0
         while try_count < max_retries:
             try_count += 1
-            sleep_randomly(10, 20)
+            self.sleep_randomly(10, 20)
             messages = self.person.mailbox.get_messages()
             if len(messages) > 0:
                 for message in messages:
@@ -193,6 +193,7 @@ class Reddit:
 
         if self.check_for_submit_rate_limit():
             self.logger.critical("Rate limit reached for the current IP")
+            self.driver.close()
             # It expires session so need to do the whole thing again
             return False
 
