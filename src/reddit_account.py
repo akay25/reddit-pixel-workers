@@ -26,8 +26,10 @@ def is_duplicate_username(driver):
     return False
 
 
-def get_email_verification_link(person: FakePerson):
-    while True:
+def get_email_verification_link(person: FakePerson, max_retries=10):
+    try_count = 0
+    while try_count < max_retries:
+        try_count += 1
         sleep_randomly(10, 20)
         messages = person.mailbox.get_messages()
         if len(messages) > 0:
