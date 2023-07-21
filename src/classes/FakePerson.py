@@ -43,6 +43,7 @@ class FakePerson:
         self.state = location_dict["state"]
         self.country = location_dict["country"]
         self.color = self.__fake.color_name()
+        self.interests = []
 
     @staticmethod
     def city_state_country(latitude, longitude):
