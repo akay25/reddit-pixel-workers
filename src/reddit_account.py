@@ -154,6 +154,7 @@ def create_account(person: FakePerson, headless=True) -> bool:
             person.username = person.username + str(randint(0, 9))
             logger.debug("Entering in username...")
             driver.find_element(By.ID, "regUsername").click()
+            driver.find_element(By.ID, "regUsername").clear()
             driver.find_element(By.ID, "regUsername").send_keys(person.username)
             sleep_randomly()
 
