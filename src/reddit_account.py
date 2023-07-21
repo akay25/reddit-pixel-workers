@@ -74,21 +74,16 @@ def select_gender_for_user(driver, person_sex):
     # No need to press continue here
 
 
-def find_continue_button(driver):
-    dialog_div = driver.find_element(
-        By.CSS_SELECTOR, "#SHORTCUT_FOCUSABLE_DIV > div.dialog"
-    )
-
-    continue_button = None
-    child_divs = dialog_div.find_elements(By.TAG_NAME, "div")
-    for child_div in child_divs:
-        button_elements = child_div.find_elements(By.TAG_NAME, "button")
-        if len(button_elements) == 1:
-            button_element = button_elements[0]
-            if "continue" in button_element.text.lower():
-                continue_button = button_elements[0]
-                break
-    return continue_button
+def find_and_click_continue_button(driver):
+    try:
+        continue_button = driver.find_element(
+            By.XPATH, "//button[contains(text(), 'Continue')]"
+        )
+        continue_button.click()
+        sleep_randomly(2, 4)
+    except Exception as e:
+        print(e)
+    return None
 
 
 def select_random_interests_for_user(driver, max_interests=MAX_INTERESTS_TO_SELECT):
@@ -107,26 +102,26 @@ def select_random_interests_for_user(driver, max_interests=MAX_INTERESTS_TO_SELE
         interest_button_element.click()
         sleep_randomly(1, 2)
 
-    continue_button = find_continue_button(driver)
-    continue_button.click()
-    sleep_randomly(4, 8)
+    find_and_click_continue_button(driver)
 
     return selected_interests
 
 
 def select_all_given_subreddits(driver):
     subreddit_join_buttons = driver.find_elements(
-        By.XPATH, "//button[contains(text(), 'My Button')]"
+        By.XPATH, "//button[contains(text(), 'Select All')]"
     )
 
     for button in subreddit_join_buttons:
+        driver.execute_script("arguments[0].scrollIntoView();", button)
         button.click()
         sleep_randomly(1, 2)
 
+    find_and_click_continue_button(driver)
+
 
 def continue_with_language(driver):
-    continue_button = find_continue_button(driver)
-    continue_button.click()
+    find_and_click_continue_button(driver)
     sleep_randomly(4, 8)
 
 
@@ -180,16 +175,17 @@ def create_account(person: FakePerson, headless=True) -> bool:
         if check_for_submit_rate_limit(driver):
             logger.info("Sleeping for 10 mins")
             sleep_randomly(600, 1000)
-            driver.find_element(
-                By.CSS_SELECTOR, "div.AnimatedForm__bottomNav > button"
-            ).click()
+            # It expires session so need to do the whole thing again
+            return
 
         # Wait for page redirection and pop-up for gender selection
         sleep_randomly(10, 20)
         select_gender_for_user(driver, person.sex)
         person.interests = select_random_interests_for_user(driver)
-
         select_all_given_subreddits(driver)
+        continue_with_language(driver)
+        find_and_click_continue_button(driver)
+        sleep_randomly(8, 15)
 
         # Email confirmation
         logger.info("Checking email...")
