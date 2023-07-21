@@ -1,7 +1,5 @@
 import pickle
-from classes.FakeMailBox import FakeMailBox
-from classes.FakePerson import FakePerson
-from reddit_account import create_account
+from classes import FakeMailBox, FakePerson, Reddit
 
 USERS_COUNT = 2  # 100000
 
@@ -10,10 +8,12 @@ while created_user_count < USERS_COUNT:
     print(f"Creating user {created_user_count}")
     person = FakePerson()
     mailbox = FakeMailBox(person)
-
     # Attach mailbox to user
     person.mailbox = mailbox
-    res = create_account(person, headless=False)
+
+    reddit_bot = Reddit(person, headless=False)
+    res = reddit_bot.create_account()
+
     if res:
         with open(f"user-{created_user_count}", "wb") as f:
             pickle.dump(person, f)
